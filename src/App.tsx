@@ -1,63 +1,69 @@
 import React, { useState } from 'react';
 import { 
-  Shield, Award, ArrowRight, Calendar, DollarSign, Lock, 
-  ChevronRight, CheckCircle2, Sparkles, Layers, Terminal, Server,
-  AlertCircle, Check, Phone, Camera, PenTool, Flame, Truck, Star
+  Flame, Shield, Award, Calendar, DollarSign, Lock, ArrowRight, Check, 
+  Sparkles, Layers, Thermometer, Clock, User, CheckCircle2, Activity, Heart
 } from 'lucide-react';
 import { AdminPortalModal } from './AdminPortalModal.tsx';
 
-interface ShowcaseItem {
-  id: string;
-  title: string;
-  subtitle: string;
-  rate: string;
-  status: string;
-  features: string[];
-  img: string;
+interface StationSlot {
+  station: string;
+  temp: string;
+  type: 'cold' | 'hot' | 'infrared' | 'compression';
+  slots: { time: string; booked: boolean }[];
 }
 
-const ITEMS: ShowcaseItem[] = [
+const STATIONS: StationSlot[] = [
   {
-    "id": "CONTRAST-CIRCUIT",
-    "title": "Contrast Hydrotherapy Circuit (Plunge & Hot Tub)",
-    "subtitle": "Sub-Zero Cold Plunge (38°F) + Ozone Thermal Mineral Bath (104°F)",
-    "rate": "$65 Single Drop-In • $220 4-Pack",
-    "status": "PLUNGE PODS ACTIVE",
-    "features": [
-      "Continuous Titanium Chiller & UV Filtration",
-      "Circulation Vasoconstriction & Flush Protocol",
-      "Normatec 3 Air Compression Leg Sprints",
-      "High-Flow Oxygen Aromatherapy Rest Lounge"
-    ],
-    "img": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f"
+    station: 'Plunge Pod Alpha (Deep Freeze)',
+    temp: '38.4°F Constant',
+    type: 'cold',
+    slots: [
+      { time: '08:00 AM', booked: true },
+      { time: '08:30 AM', booked: false },
+      { time: '09:00 AM', booked: true },
+      { time: '09:30 AM', booked: false },
+      { time: '10:00 AM', booked: false },
+      { time: '10:30 AM', booked: true }
+    ]
   },
   {
-    "id": "SAUNA-INFRARED",
-    "title": "Full-Spectrum Infrared Detox & Chromotherapy",
-    "subtitle": "Near, Mid & Far Infrared Waves // 160°F Cellular Detoxification",
-    "rate": "$55 / 45-Min Private Pod",
-    "status": "POD 02 CALIBRATED",
-    "features": [
-      "Low EMF Solocarbon Heating Heaters",
-      "Medical Grade Chromotherapy LED Array",
-      "Guided Breathwork Audio Integration",
-      "Cold Eucalyptus Towel Post-Session Service"
-    ],
-    "img": "https://images.unsplash.com/photo-1574680096145-d05b474e2155"
+    station: 'Thermal Spa Bravo (Mineral Soak)',
+    temp: '104.2°F Constant',
+    type: 'hot',
+    slots: [
+      { time: '08:00 AM', booked: false },
+      { time: '08:30 AM', booked: false },
+      { time: '09:00 AM', booked: true },
+      { time: '09:30 AM', booked: true },
+      { time: '10:00 AM', booked: false },
+      { time: '10:30 AM', booked: false }
+    ]
   },
   {
-    "id": "IV-CHAMPION",
-    "title": "Championship Bout Weight Cut & Rehydration IV",
-    "subtitle": "Registered Nurse Administered // 1000ml Electrolytes, NAD+ & Glutathione",
-    "rate": "$260 / Infusion Session",
-    "status": "LICENSED RN ON DECK",
-    "features": [
-      "Rapid Cellular Osmotic Rehydration",
-      "High-Dose Vitamin B-Complex & Zinc Boost",
-      "Digital Physician Medical Screening Gate",
-      "Immediate Lactic Acid Clearance Acceleration"
-    ],
-    "img": "https://images.unsplash.com/photo-1518611012118-696072aa579a"
+    station: 'Infrared Suite Charlie (Far-IR)',
+    temp: '160.0°F Solocarbon',
+    type: 'infrared',
+    slots: [
+      { time: '08:00 AM', booked: true },
+      { time: '08:30 AM', booked: true },
+      { time: '09:00 AM', booked: false },
+      { time: '09:30 AM', booked: false },
+      { time: '10:00 AM', booked: true },
+      { time: '10:30 AM', booked: false }
+    ]
+  },
+  {
+    station: 'Normatec Compression Lounge Delta',
+    temp: 'Ambient Zero-G',
+    type: 'compression',
+    slots: [
+      { time: '08:00 AM', booked: false },
+      { time: '08:30 AM', booked: false },
+      { time: '09:00 AM', booked: false },
+      { time: '09:30 AM', booked: true },
+      { time: '10:00 AM', booked: false },
+      { time: '10:30 AM', booked: false }
+    ]
   }
 ];
 
@@ -69,250 +75,277 @@ export default function App() {
       window.location.hash === '#admin'
     )
   );
-  const [selectedItem, setSelectedItem] = useState(ITEMS[0].id);
-  const [inquiryName, setInquiryName] = useState('');
-  const [inquiryPhone, setInquiryPhone] = useState('');
+
+  const [activeTab, setActiveTab] = useState<'contrast' | 'iv-lounge'>('contrast');
+  const [selectedStation, setSelectedStation] = useState('Plunge Pod Alpha (Deep Freeze)');
+  const [selectedTime, setSelectedTime] = useState('08:30 AM');
+  const [tier, setTier] = useState<'dropin' | 'pack' | 'blackpass'>('blackpass');
+  const [athleteName, setAthleteName] = useState('');
+  const [athletePhone, setAthletePhone] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const tierPrice = tier === 'dropin' ? 65 : tier === 'pack' ? 220 : 289;
+
+  const handleBooking = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inquiryName || !inquiryPhone) return;
+    if (!athleteName || !athletePhone) return;
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
-      setInquiryName('');
-      setInquiryPhone('');
+      setAthleteName('');
+      setAthletePhone('');
     }, 4000);
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0B] text-zinc-100 font-sans selection:bg-rose-500/20 selection:text-rose-400">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#0A0A0B]/90 backdrop-blur-md border-b border-zinc-800/80 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <div className="min-h-screen bg-[#0A0A0B] text-zinc-100 font-sans selection:bg-red-500/20 selection:text-red-400">
+      {/* Top Station Status & Navigation Bar */}
+      <header className="sticky top-0 z-40 bg-[#0A0A0B]/95 backdrop-blur-xl border-b border-zinc-800 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center text-white font-extrabold shadow-lg shadow-rose-600/20">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-black shadow-lg shadow-red-600/20">
+              <Activity className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-rose-500 font-semibold">Elite Fighter & Athlete Contrast Recovery Lab OS</span>
-              <h1 className="text-lg font-bold tracking-tight text-white leading-none">COMBAT RECOVERY LAB OS</h1>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-red-500 font-bold block">UFC & PRO ATHLETE FACILITY</span>
+              <h1 className="text-base font-extrabold text-white leading-none tracking-tight">COMBAT RECOVERY LAB OS</h1>
             </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-8 text-xs font-medium uppercase tracking-wider text-zinc-400">
-            <a href="#packages" className="hover:text-rose-400 transition">Services</a>
-            <a href="#specs" className="hover:text-rose-400 transition">Standards</a>
-            <a href="#booking" className="hover:text-rose-400 transition">Reserve Session</a>
-          </div>
-
-          <div className="flex items-center gap-3">
+          {/* Dual Protocol Switcher */}
+          <div className="flex items-center gap-2 bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-xs font-mono">
             <button
-              onClick={() => setIsAdminOpen(true)}
-              className="px-4 py-2 rounded-lg bg-zinc-900 border border-rose-500/40 text-rose-400 hover:bg-rose-500/10 text-xs font-mono uppercase tracking-wider transition flex items-center gap-2"
+              onClick={() => setActiveTab('contrast')}
+              className={`px-3 py-1.5 rounded-lg transition ${
+                activeTab === 'contrast' ? 'bg-red-500 text-zinc-950 font-bold' : 'text-zinc-400 hover:text-white'
+              }`}
             >
-              <Lock className="w-3.5 h-3.5" />
-              <span>[ STUDIO PASS ]</span>
+              Contrast Hydro Suite (38°F / 104°F)
+            </button>
+            <button
+              onClick={() => setActiveTab('iv-lounge')}
+              className={`px-3 py-1.5 rounded-lg transition ${
+                activeTab === 'iv-lounge' ? 'bg-red-500 text-zinc-950 font-bold' : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              Medical Athletic IV Lounge
             </button>
           </div>
+
+          <button
+            onClick={() => setIsAdminOpen(true)}
+            className="px-3.5 py-1.5 rounded-xl bg-zinc-900 border border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs font-mono uppercase tracking-wider transition flex items-center gap-1.5"
+          >
+            <Lock className="w-3 h-3" />
+            <span>[ RECOVERY PASS ]</span>
+          </button>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative pt-20 pb-24 px-6 overflow-hidden border-b border-zinc-800">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(244,63,94,0.15),rgba(255,255,255,0))]"></div>
-        <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-mono mb-6">
-            <Star className="w-3.5 h-3.5" />
-            <span>PREMIUM STUDIO ENGINE • 9.8 VERIFIED PRODUCTION GRADE</span>
+      {/* Main Container */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Live Facility Telemetry Ticker */}
+        <section className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="p-4 rounded-2xl bg-[#121214] border border-zinc-800">
+            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+              <span>ICE BATH CHILLER</span>
+              <span className="text-cyan-400 font-bold">CALIBRATED</span>
+            </div>
+            <span className="text-2xl font-extrabold font-mono text-cyan-400">38.4°F</span>
+            <span className="text-[10px] text-zinc-500 font-mono block mt-1">Continuous UV-Ozone Sterilization</span>
           </div>
 
-          <h2 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight">
-            COMBAT <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-red-500">RECOVERY LAB OS</span>
-          </h2>
-
-          <p className="mt-6 text-lg sm:text-xl text-zinc-400 max-w-3xl mx-auto leading-relaxed">
-            Cold Plunge Contrast, Infrared Saunas & Medical IV Intake. Precision craft, dedicated client portals, and turnkey Supabase PostgreSQL database schemas.
-          </p>
-
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <a
-              href="#booking"
-              className="px-8 py-3.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-zinc-950 font-bold text-sm tracking-wide transition shadow-lg shadow-rose-500/25 flex items-center gap-2"
-            >
-              <span>Book Priority Session</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
-            <button
-              onClick={() => setIsAdminOpen(true)}
-              className="px-8 py-3.5 rounded-xl bg-zinc-900 border border-zinc-700 hover:border-rose-500/40 text-zinc-200 text-sm font-semibold transition flex items-center gap-2"
-            >
-              <span>Launch Studio OS</span>
-              <span className="text-rose-400 font-mono text-xs font-bold">[recovery2026]</span>
-            </button>
+          <div className="p-4 rounded-2xl bg-[#121214] border border-zinc-800">
+            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+              <span>MINERAL SPA BAKE</span>
+              <span className="text-amber-400 font-bold">READY</span>
+            </div>
+            <span className="text-2xl font-extrabold font-mono text-amber-400">104.2°F</span>
+            <span className="text-[10px] text-zinc-500 font-mono block mt-1">Magnesium & Epsom Mineral Salt Infused</span>
           </div>
 
-          {/* Metrics Ticker */}
-          <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
-            
-              <div key="DUAL-ZONE CONTRAST PLUNGES" className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-sm">
-                <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">DUAL-ZONE CONTRAST PLUNGES</span>
-                <p className="text-lg sm:text-xl font-bold font-mono text-rose-400 mt-1">{"38°F / 104°F"}</p>
-              </div>
-            
-              <div key="MONTHLY RECOVERY SESSIONS" className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-sm">
-                <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">MONTHLY RECOVERY SESSIONS</span>
-                <p className="text-lg sm:text-xl font-bold font-mono text-rose-400 mt-1">{"2,150 VISITS"}</p>
-              </div>
-            
-              <div key="MEDICAL IV PROTOCOLS" className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-sm">
-                <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">MEDICAL IV PROTOCOLS</span>
-                <p className="text-lg sm:text-xl font-bold font-mono text-rose-400 mt-1">{"14 FORMULATIONS"}</p>
-              </div>
-            
-              <div key="PRO FIGHTER ENROLLMENT" className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-sm">
-                <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">PRO FIGHTER ENROLLMENT</span>
-                <p className="text-lg sm:text-xl font-bold font-mono text-rose-400 mt-1">{"84 ATHLETES"}</p>
-              </div>
-            
+          <div className="p-4 rounded-2xl bg-[#121214] border border-zinc-800">
+            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+              <span>INFRARED CABIN</span>
+              <span className="text-red-400 font-bold">ACTIVE</span>
+            </div>
+            <span className="text-2xl font-extrabold font-mono text-red-400">160.0°F</span>
+            <span className="text-[10px] text-zinc-500 font-mono block mt-1">Low-EMF Solocarbon Chromotherapy</span>
           </div>
-        </div>
-      </section>
 
-      {/* Showcase Grid */}
-      <section id="packages" className="py-20 px-6 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
-          <div>
-            <span className="text-xs font-mono text-rose-500 uppercase tracking-widest block mb-2">CURATED TIERS & PACKAGES</span>
-            <h3 className="text-3xl font-extrabold text-white">Signature Studio Services</h3>
+          <div className="p-4 rounded-2xl bg-[#121214] border border-zinc-800">
+            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+              <span>REGISTERED NURSE</span>
+              <span className="text-emerald-400 font-bold">ON-SITE</span>
+            </div>
+            <span className="text-2xl font-extrabold font-mono text-emerald-400">14 IV BAGS</span>
+            <span className="text-[10px] text-zinc-500 font-mono block mt-1">NAD+ & Weight Cut Osmotic Protocols</span>
           </div>
-          <span className="text-sm text-zinc-400 mt-2 md:mt-0 font-mono">100% Verified Quality & VIP Gate</span>
-        </div>
+        </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {ITEMS.map((item) => (
-            <div 
-              key={item.id}
-              className="group rounded-2xl bg-[#121214] border border-zinc-800 hover:border-rose-500/40 transition-all overflow-hidden flex flex-col shadow-xl"
-            >
-              <div className="relative h-56 overflow-hidden bg-zinc-900">
-                <img 
-                  src={item.img} 
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-transparent to-transparent"></div>
-                <div className="absolute top-4 right-4 px-2.5 py-1 rounded bg-black/70 backdrop-blur-md border border-zinc-700 text-[11px] font-mono font-bold text-rose-400">
-                  {item.status}
-                </div>
+        {activeTab === 'contrast' ? (
+          /* Interactive Station Timeline Matrix */
+          <section className="mb-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-3 border-b border-zinc-800">
+              <div>
+                <span className="text-xs font-mono text-red-400 uppercase tracking-widest block">STATION RESERVATION GRID</span>
+                <h2 className="text-2xl font-extrabold text-white">Daily Station Time-Slot Matrix</h2>
               </div>
+              <span className="text-xs font-mono text-zinc-400 mt-1 sm:mt-0">Select a time-slot to book your 30-min recovery block</span>
+            </div>
 
-              <div className="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <span className="text-xs font-mono text-rose-400 uppercase tracking-wider block mb-1">{item.id}</span>
-                  <h4 className="text-xl font-bold text-white mb-2 leading-tight">{item.title}</h4>
-                  <p className="text-xs text-zinc-400 mb-4">{item.subtitle}</p>
+            <div className="space-y-4">
+              {STATIONS.map((station) => (
+                <div key={station.station} className="p-5 rounded-2xl bg-[#121214] border border-zinc-800">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-zinc-800/80 gap-2 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Thermometer className={`w-4 h-4 ${
+                        station.type === 'cold' ? 'text-cyan-400' :
+                        station.type === 'hot' ? 'text-amber-400' :
+                        station.type === 'infrared' ? 'text-red-400' : 'text-emerald-400'
+                      }`} />
+                      <h3 className="text-sm font-bold text-white font-mono">{station.station}</h3>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-zinc-400">{station.temp}</span>
+                  </div>
 
-                  <div className="space-y-2 mb-6">
-                    {item.features.map((feat, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs text-zinc-300 font-mono">
-                        <Check className="w-3.5 h-3.5 text-rose-400 flex-shrink-0" />
-                        <span>{feat}</span>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
+                    {station.slots.map((slot) => {
+                      const isSelected = selectedStation === station.station && selectedTime === slot.time;
+                      return (
+                        <button
+                          key={slot.time}
+                          disabled={slot.booked}
+                          onClick={() => {
+                            setSelectedStation(station.station);
+                            setSelectedTime(slot.time);
+                          }}
+                          className={`p-2.5 rounded-xl border text-xs font-mono transition flex flex-col items-center justify-center ${
+                            slot.booked 
+                              ? 'bg-zinc-950/60 border-zinc-900 text-zinc-600 cursor-not-allowed' 
+                              : isSelected 
+                              ? 'bg-red-500 text-zinc-950 font-bold border-red-400 shadow-md shadow-red-500/30' 
+                              : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
+                          }`}
+                        >
+                          <span>{slot.time}</span>
+                          <span className="text-[9px] block mt-0.5">
+                            {slot.booked ? 'BOOKED' : isSelected ? 'SELECTED' : 'AVAILABLE'}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-
-                <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between">
-                  <span className="text-sm font-bold text-rose-400 font-mono">{item.rate}</span>
-                  <a
-                    href="#booking"
-                    onClick={() => setSelectedItem(item.id)}
-                    className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-500 hover:text-zinc-950 text-zinc-200 text-xs font-semibold transition"
-                  >
-                    Select Option
-                  </a>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
+        ) : (
+          /* Medical IV Lounge Protocols */
+          <section className="mb-10">
+            <div className="flex items-center justify-between mb-6 pb-3 border-b border-zinc-800">
+              <div>
+                <span className="text-xs font-mono text-red-400 uppercase tracking-widest block">MEDICAL PROTOCOLS</span>
+                <h2 className="text-2xl font-extrabold text-white">Physician Administered Athletic IV Infusions</h2>
+              </div>
+              <span className="text-xs font-mono text-emerald-400">All Formulas Screened by Medical Director</span>
+            </div>
 
-      {/* Booking / Intake Form */}
-      <section id="booking" className="py-20 px-6 bg-zinc-950 border-t border-zinc-800">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <span className="text-xs font-mono text-rose-500 uppercase tracking-widest block mb-2">PRIORITY INTAKE</span>
-            <h3 className="text-3xl font-extrabold text-white">Reserve Session or Submit Consultation</h3>
-            <p className="text-zinc-400 text-sm mt-3">Direct integration into PostgreSQL records with instant deposit triage.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { title: 'The Champion Weight-Cut Flush', price: 260, desc: '1000ml Saline, high-dose B-Complex, magnesium sulfate, and taurine for post-weigh-in rehydration.' },
+                { title: 'NAD+ Cellular Muscle Repair', price: 340, desc: '500mg Pure NAD+ coenzyme infusion accelerating mitochondrial repair, DOMS soreness, and ATP regeneration.' },
+                { title: 'Glutathione & Amino Master Push', price: 195, desc: '2000mg Master antioxidant push neutralizing systemic oxidative stress and metabolic inflammation.' }
+              ].map((iv, i) => (
+                <div key={i} className="p-6 rounded-3xl bg-[#121214] border border-zinc-800 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-white mb-2">{iv.title}</h3>
+                    <p className="text-xs text-zinc-400 mb-6 leading-relaxed">{iv.desc}</p>
+                  </div>
+                  <div className="pt-4 border-t border-zinc-800 flex items-center justify-between">
+                    <span className="text-lg font-bold font-mono text-red-400">${iv.price}</span>
+                    <button
+                      onClick={() => setSelectedStation(iv.title)}
+                      className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs font-mono font-bold text-zinc-200 hover:bg-zinc-800"
+                    >
+                      Select Protocol
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Tier Selector & Reservation Bar */}
+        <section className="p-6 sm:p-8 rounded-3xl bg-[#121214] border border-red-500/30 shadow-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-zinc-800 gap-4 mb-6">
+            <div>
+              <span className="text-xs font-mono text-red-400 uppercase tracking-widest block">MEMBERSHIP & RESERVATION GATE</span>
+              <h3 className="text-xl font-bold text-white">Lock In Session: {selectedStation} ({selectedTime})</h3>
+            </div>
+
+            {/* Tier Switcher */}
+            <div className="flex items-center gap-2 bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-xs font-mono">
+              {[
+                { id: 'dropin', label: 'Single Drop-In ($65)' },
+                { id: 'pack', label: '4-Session Pack ($220)' },
+                { id: 'blackpass', label: 'Fighter Black Pass ($289/mo)' }
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setTier(t.id as any)}
+                  className={`px-3 py-1.5 rounded-lg transition ${
+                    tier === t.id ? 'bg-red-500 text-zinc-950 font-bold' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 rounded-2xl bg-[#121214] border border-rose-500/20 shadow-2xl space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-mono uppercase text-zinc-400 mb-2">Client / Production Entity</label>
-                <input
-                  type="text"
-                  required
-                  value={inquiryName}
-                  onChange={(e) => setInquiryName(e.target.value)}
-                  placeholder="e.g. Sterling Productions LLC"
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-zinc-100 focus:outline-none focus:border-rose-500 text-sm font-sans"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-mono uppercase text-zinc-400 mb-2">Direct Phone / Mobile</label>
-                <input
-                  type="tel"
-                  required
-                  value={inquiryPhone}
-                  onChange={(e) => setInquiryPhone(e.target.value)}
-                  placeholder="+1 (555) 234-5678"
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-zinc-100 focus:outline-none focus:border-rose-500 text-sm font-sans"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-mono uppercase text-zinc-400 mb-2">Selected Package</label>
-              <select
-                value={selectedItem}
-                onChange={(e) => setSelectedItem(e.target.value)}
-                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-zinc-100 focus:outline-none focus:border-rose-500 text-sm font-sans"
-              >
-                {ITEMS.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.id} - {item.title} ({item.rate})
-                  </option>
-                ))}
-              </select>
-            </div>
-
+          <form onSubmit={handleBooking} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input
+              type="text"
+              required
+              value={athleteName}
+              onChange={(e) => setAthleteName(e.target.value)}
+              placeholder="Athlete / Member Name"
+              className="px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
+            />
+            <input
+              type="tel"
+              required
+              value={athletePhone}
+              onChange={(e) => setAthletePhone(e.target.value)}
+              placeholder="Mobile Phone (Access Passcode)"
+              className="px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
+            />
             <button
               type="submit"
-              className="w-full py-4 rounded-xl bg-rose-500 hover:bg-rose-400 text-zinc-950 font-extrabold text-sm uppercase tracking-wider transition shadow-lg shadow-rose-500/20"
+              className="py-3 px-6 rounded-xl bg-red-500 hover:bg-red-400 text-zinc-950 font-bold text-xs font-mono uppercase tracking-wider transition shadow-lg shadow-red-500/25"
             >
-              {submitted ? '✓ RESERVATION CONFIRMED & LOGGED' : 'SUBMIT APPOINTMENT RESERVATION'}
+              {submitted ? '✓ SESSION CONFIRMED' : `BOOK ${selectedTime} (${tierPrice} USD)`}
             </button>
           </form>
-        </div>
-      </section>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-zinc-800 bg-[#0A0A0B] text-zinc-500 text-xs font-mono">
+      <footer className="py-8 px-6 border-t border-zinc-800 bg-[#0A0A0B] text-zinc-500 text-xs font-mono">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <span className="text-zinc-300 font-bold">COMBAT RECOVERY LAB OS</span> • Commercial Studio OS v1.0.0
+            <span className="text-zinc-300 font-bold">COMBAT RECOVERY LAB OS</span> • Turnkey Athletic Recovery OS v1.0.0
           </div>
           <div className="flex items-center gap-6">
             <span>Ghost Factory™ Protocol</span>
             <span>Supabase RLS Enforced</span>
             <button
               onClick={() => setIsAdminOpen(true)}
-              className="text-rose-400 hover:underline"
+              className="text-red-400 hover:underline"
             >
-              Admin Portal (recovery2026)
+              Director Portal (recovery2026)
             </button>
           </div>
         </div>

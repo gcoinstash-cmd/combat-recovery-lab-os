@@ -107,7 +107,7 @@ export default function App() {
               <Activity className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-red-500 font-bold block">UFC & PRO ATHLETE FACILITY</span>
+              <span className="text-xs font-semibold tracking-wider font-mono uppercase tracking-widest text-red-500 font-bold block">UFC & PRO ATHLETE FACILITY</span>
               <h1 className="text-base font-extrabold text-white leading-none tracking-tight">COMBAT RECOVERY LAB OS</h1>
             </div>
           </div>
@@ -147,39 +147,39 @@ export default function App() {
         {/* Live Facility Telemetry Ticker */}
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <div className="p-4 rounded-2xl bg-[#121214] border border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+            <div className="flex items-center justify-between text-xs font-semibold font-mono text-zinc-400 mb-1">
               <span>ICE BATH CHILLER</span>
               <span className="text-cyan-400 font-bold">CALIBRATED</span>
             </div>
             <span className="text-2xl font-extrabold font-mono text-cyan-400">38.4°F</span>
-            <span className="text-[10px] text-zinc-500 font-mono block mt-1">Continuous UV-Ozone Sterilization</span>
+            <span className="text-xs font-semibold tracking-wider text-zinc-300 font-mono block mt-1">Continuous UV-Ozone Sterilization</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#121214] border border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+            <div className="flex items-center justify-between text-xs font-semibold font-mono text-zinc-400 mb-1">
               <span>MINERAL SPA BAKE</span>
               <span className="text-amber-400 font-bold">READY</span>
             </div>
             <span className="text-2xl font-extrabold font-mono text-amber-400">104.2°F</span>
-            <span className="text-[10px] text-zinc-500 font-mono block mt-1">Magnesium & Epsom Mineral Salt Infused</span>
+            <span className="text-xs font-semibold tracking-wider text-zinc-300 font-mono block mt-1">Magnesium & Epsom Mineral Salt Infused</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#121214] border border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+            <div className="flex items-center justify-between text-xs font-semibold font-mono text-zinc-400 mb-1">
               <span>INFRARED CABIN</span>
               <span className="text-red-400 font-bold">ACTIVE</span>
             </div>
             <span className="text-2xl font-extrabold font-mono text-red-400">160.0°F</span>
-            <span className="text-[10px] text-zinc-500 font-mono block mt-1">Low-EMF Solocarbon Chromotherapy</span>
+            <span className="text-xs font-semibold tracking-wider text-zinc-300 font-mono block mt-1">Low-EMF Solocarbon Chromotherapy</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#121214] border border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-1">
+            <div className="flex items-center justify-between text-xs font-semibold font-mono text-zinc-400 mb-1">
               <span>REGISTERED NURSE</span>
               <span className="text-emerald-400 font-bold">ON-SITE</span>
             </div>
             <span className="text-2xl font-extrabold font-mono text-emerald-400">14 IV BAGS</span>
-            <span className="text-[10px] text-zinc-500 font-mono block mt-1">NAD+ & Weight Cut Osmotic Protocols</span>
+            <span className="text-xs font-semibold tracking-wider text-zinc-300 font-mono block mt-1">NAD+ & Weight Cut Osmotic Protocols</span>
           </div>
         </section>
 
@@ -260,7 +260,7 @@ export default function App() {
                 <div key={i} className="p-6 rounded-3xl bg-[#121214] border border-zinc-800 flex flex-col justify-between">
                   <div>
                     <h3 className="text-lg font-bold text-white mb-2">{iv.title}</h3>
-                    <p className="text-xs text-zinc-400 mb-6 leading-relaxed">{iv.desc}</p>
+                    <p className="text-base text-zinc-200 leading-relaxed mb-6 leading-relaxed">{iv.desc}</p>
                   </div>
                   <div className="pt-4 border-t border-zinc-800 flex items-center justify-between">
                     <span className="text-lg font-bold font-mono text-red-400">${iv.price}</span>
@@ -324,7 +324,7 @@ export default function App() {
             />
             <button
               type="submit"
-              className="py-3 px-6 rounded-xl bg-red-500 hover:bg-red-400 text-zinc-950 font-bold text-xs font-mono uppercase tracking-wider transition shadow-lg shadow-red-500/25"
+              className="py-3 px-6 rounded-xl bg-red-500 hover:bg-red-400 text-zinc-950 font-bold text-base font-semibold min-h-[44px] font-mono uppercase tracking-wider transition shadow-lg shadow-red-500/25"
             >
               {submitted ? '✓ SESSION CONFIRMED' : `BOOK ${selectedTime} (${tierPrice} USD)`}
             </button>
@@ -333,7 +333,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-zinc-800 bg-[#0A0A0B] text-zinc-500 text-xs font-mono">
+      <footer className="py-8 px-6 border-t border-zinc-800 bg-[#0A0A0B] text-zinc-300 text-xs font-mono">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <span className="text-zinc-300 font-bold">COMBAT RECOVERY LAB OS</span> • Turnkey Athletic Recovery OS v1.0.0
